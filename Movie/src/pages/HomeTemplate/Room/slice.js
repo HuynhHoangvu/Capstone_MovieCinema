@@ -5,7 +5,9 @@ import api from "../../../services/apiService"
 const initialState = {
     loading: false,
     data:null,
-    error:null
+    error:null,
+    bookingLoading: false,
+    bookingError: null,
 }
 export const roomFetch = createAsyncThunk("roomFetch",async( maLichChieu,{rejectWithValue}) =>{
     try{
@@ -15,6 +17,20 @@ export const roomFetch = createAsyncThunk("roomFetch",async( maLichChieu,{reject
         return rejectWithValue(err);
     }
 })
+export const bookTicket = createAsyncThunk(
+    "bookTicket",
+    async (bookingData, { rejectWithValue }) => {
+        try {
+            // API đặt vé sử dụng phương thức POST
+            const response = await api.post("QuanLyDatVe/DatVe", bookingData);
+            // API trả về thông báo thành công sau khi đặt
+            return response.data.content; 
+        } catch (err) {
+            // Lấy thông báo lỗi chi tiết từ API nếu có
+            return rejectWithValue(err.response?.data?.content || err.message);
+        }
+    }
+);
 const roomReducer = createSlice({
     name: "listMovieReducer",
     initialState,
@@ -24,17 +40,30 @@ const roomReducer = createSlice({
             state.loading = true;
             state.error = null;
             state.data = null; 
-        });
+        })
 
-        builder.addCase(roomFetch.fulfilled,(state,action)=>{
+        .addCase(roomFetch.fulfilled,(state,action)=>{
             state.loading = false;
             state.data =  action.payload;
         })
-        builder.addCase(roomFetch.rejected,(state,action)=>{
+      .addCase(roomFetch.rejected,(state,action)=>{
             state.loading = false;
             state.error = action.error;
 
         })
+         .addCase(bookTicket.pending, (state) => {
+                state.bookingLoading = true;
+                state.bookingError = null;
+            })
+            .addCase(bookTicket.fulfilled,(state,action)=>{
+                state.bookingLoading = false;
+               state.data =  action.payload;
+
+            })
+            .addCase(bookTicket.rejected,(state,action)=>{
+                state.bookingLoading = false;
+                state.bookingError = action.payload; 
+            });
     }
 })
 export default roomReducer.reducer;

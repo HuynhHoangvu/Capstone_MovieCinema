@@ -9,6 +9,14 @@ import showReducer from "../pages/HomeTemplate/showTime/slice";
 import showtimeDetailSlice from "../pages/HomeTemplate/DetailPage/showtimeDetailSlice";
 import signUpReducer from "../pages/HomeTemplate/SignUpPage/slice";
 import roomReducer from "../pages/HomeTemplate/Room/slice";
+import movieReducer from "../pages/AdminTemplate/Dashboard/slice";
+import addFilmReducer from "../pages/AdminTemplate/AddFilmPage/slice";
+import editFilmReducer from "../pages/AdminTemplate/EditFilmPage/slice";
+import deleteFilmReducer from "../pages/AdminTemplate/DeleteFilm/slice";
+import scheduleReducer from "../pages/AdminTemplate/CalendaPage/slice";
+import updateReducer from "../pages/HomeTemplate/ProfilePage/Profile/slice";
+import bookingReducer from "../pages/HomeTemplate/ProfilePage/BookingPage/slice";
+import manageUserSlice from "../pages/AdminTemplate/ManageUser/slice";
 export const store = configureStore({
     reducer:{
         listMovieReducer,
@@ -20,6 +28,14 @@ export const store = configureStore({
         showReducer,
         showtimeDetail: showtimeDetailSlice,
         signUpReducer,
-        roomReducer
+        roomReducer,
+        movieReducer,
+        addFilmReducer,
+        editFilmReducer,
+        deleteFilmReducer,
+        schedule: scheduleReducer,
+        updateReducer,
+        bookingReducer,
+        manageUserSlice,
     },
 })

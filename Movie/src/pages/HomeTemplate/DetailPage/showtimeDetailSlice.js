@@ -1,14 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-// Thay thế bằng đường dẫn thực tế đến Axios instance của bạn
-// Ví dụ: import api from 'path/to/your/apiInstance';
 import api from '../../../services/apiService';
 const initialState = {
   loading: false,
-  data: null, // Chứa dữ liệu lịch chiếu chi tiết theo phim
+  data: null, 
   error: null,
 };
 
-// **API:** /api/QuanLyRap/LayThongTinLichChieuPhim?MaPhim={maPhim}
 export const fetchShowtimeByMovie = createAsyncThunk(
   "showtimeDetail/fetchShowtimeByMovie",
   async (maPhim, { rejectWithValue }) => {
@@ -38,11 +35,10 @@ const showtimeDetailSlice = createSlice({
       })
       .addCase(fetchShowtimeByMovie.fulfilled, (state, action) => {
         state.loading = false;
-        state.data = action.payload; // Dữ liệu content
+        state.data = action.payload; 
       })
       .addCase(fetchShowtimeByMovie.rejected, (state, action) => {
         state.loading = false;
-        // Lỗi được truyền từ rejectWithValue
         state.error = action.payload; 
         state.data = null;
       });

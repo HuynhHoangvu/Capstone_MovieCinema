@@ -1,13 +1,11 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { roomFetch } from './slice'; // Giả sử roomSlice.js nằm ở thư mục slices
+import { roomFetch, bookTicket } from './slice';
 import { useParams } from 'react-router-dom';
-
-// --- Component Ghế Ngồi ---
+// --- Component Ghế Ngồi (Không thay đổi) ---
 const Seat = ({ seat, isSelecting, onSelect }) => {
     let className = 'w-6 h-6 m-0.5 md:w-8 md:h-8 md:m-1 flex items-center justify-center text-xs font-semibold rounded transition-colors duration-150';
 
-    // Xác định trạng thái ghế
     const isReserved = seat.daDat;
     const isVIP = seat.loaiGhe === 'Vip';
 
@@ -20,7 +18,7 @@ const Seat = ({ seat, isSelecting, onSelect }) => {
             </div>
         );
     }
-    
+
     if (isSelecting) {
         // Ghế đang chọn (Xanh lá)
         className += ' bg-green-500 border border-green-600 text-white cursor-pointer';
@@ -32,159 +30,184 @@ const Seat = ({ seat, isSelecting, onSelect }) => {
         className += ' bg-gray-600 hover:bg-gray-500 cursor-pointer';
     }
 
-    const seatNameDisplay = `${seat.stt}`; // Hiển thị số ghế nếu muốn
-    
+    // Ghế không hiển thị số để giữ nguyên kích thước nhỏ
     return (
-        <div 
+        <div
             className={className}
             onClick={() => !isReserved && onSelect(seat)}
         >
-            {/* Nếu muốn hiển thị số ghế, bỏ comment dòng dưới */}
-            {/* <span className='text-white'>{seatNameDisplay}</span> */}
+            {/* <span className='text-white'>{seat.stt}</span> */}
         </div>
     );
 };
 
-
 // --- Component Chính: BookingRoom ---
 const BookingRoom = () => {
     const dispatch = useDispatch();
-    const { loading, data, error } = useSelector(state => state.roomReducer); // Lấy state từ roomReducer
-    const { maLichChieu } = useParams();    
-    // Lấy tên người dùng
+
+    // Lấy state từ roomReducer & userReducer
+    const { loading, data, error, bookingLoading, bookingError } = useSelector(state => state.roomReducer);
+    const { maLichChieu } = useParams();
     const currentUser = useSelector(state => state.userReducer.data);
+    const userAccount = currentUser?.taiKhoan;
+    // ⭐ Đảm bảo lấy được userName cho thông báo thành công
     const userName = currentUser?.hoTen || 'Quý Khách';
-    // State cho ghế đang chọn (client-side)
+    const isUserLoggedIn = !!currentUser;
     const [selectedSeats, setSelectedSeats] = useState([]);
-    const [countdown, setCountdown] = useState(300); // 5 phút = 300 giây
+    const [countdown, setCountdown] = useState(300);
 
     const danhSachGhe = data?.danhSachGhe || [];
     const thongTinPhim = data?.thongTinPhim;
 
-
-     useEffect(() => {
-        // 1. Gọi API khi component được mount
-        // 🔥 CHỈ GỌI API KHI maLichChieu TỪ URL TỒN TẠI (Đã loại bỏ mã mặc định 15344)
+    // --- useEffect: Lấy dữ liệu và Bắt đầu Timer ---
+    useEffect(() => {
+        // Lấy dữ liệu phòng vé
         if (maLichChieu) {
-            dispatch(roomFetch(maLichChieu)); 
+            dispatch(roomFetch(maLichChieu));
         }
-        
-        // 2. Thiết lập bộ đếm thời gian
+
+        // Thiết lập bộ đếm thời gian
         const timer = setInterval(() => {
-            setCountdown(prev => (prev > 0 ? prev - 1 : 0));
+            setCountdown(prev => {
+                if (prev > 0) return prev - 1;
+                // Có thể thêm logic tự động hủy chọn ghế hoặc thông báo hết giờ tại đây
+                return 0; 
+            });
         }, 1000);
 
+        // Cleanup: Dừng timer khi component unmount
         return () => clearInterval(timer);
-    // 🔥 Sử dụng maLichChieu từ useParams làm dependency
-    }, [dispatch, maLichChieu]); 
-    // --- Chuyển đổi Danh Sách Ghế sang cấu trúc Hàng/Cột (RẤT QUAN TRỌNG) ---
+    }, [dispatch, maLichChieu]);
+
+    // --- Chuyển đổi Danh Sách Ghế sang cấu trúc Hàng/Cột (Dùng useMemo) ---
     const seatsByRow = useMemo(() => {
         if (!danhSachGhe.length) return {};
-        
-        const seatsPerRow = 16; // Giả định 16 ghế/hàng như giao diện mẫu
+
+        const seatsPerRow = 16;
         const groupedSeats = {};
-        
+
         danhSachGhe.forEach((seat, index) => {
-            // Logic phân nhóm để tạo tên hàng A, B, C,...
             const rowIndex = Math.floor(index / seatsPerRow);
             const rowChar = String.fromCharCode(65 + rowIndex); // A, B, C, ...
-            
+
             if (!groupedSeats[rowChar]) {
                 groupedSeats[rowChar] = [];
             }
             groupedSeats[rowChar].push(seat);
         });
-        
+
         return groupedSeats;
     }, [danhSachGhe]);
 
     // Hàm tiện ích để lấy tên ghế có hàng (A1, B16)
     const getSeatDisplayName = (seat) => {
-        const index = danhSachGhe.findIndex(g => g.maGhe === seat.maGhe);
-        if (index === -1) return `${seat.tenGhe || seat.stt}`; 
-
         const seatsPerRow = 16;
+        const index = danhSachGhe.findIndex(g => g.maGhe === seat.maGhe);
+
+        if (index === -1) return `${seat.tenGhe || seat.stt}`;
+
         const rowIndex = Math.floor(index / seatsPerRow);
-        const rowChar = String.fromCharCode(65 + rowIndex); // A, B, C, ...
-        const seatNumberInRow = (index % seatsPerRow) + 1; 
-        
+        const rowChar = String.fromCharCode(65 + rowIndex);
+        const seatNumberInRow = (index % seatsPerRow) + 1;
+
         return `${rowChar}${seatNumberInRow}`;
     };
-
-
-    useEffect(() => {
-        // 1. Gọi API khi component được mount
-        dispatch(roomFetch(maLichChieu || 15344)); // Dùng mã mặc định nếu không truyền
-        
-        // 2. Thiết lập bộ đếm thời gian
-        const timer = setInterval(() => {
-            setCountdown(prev => (prev > 0 ? prev - 1 : 0));
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, [dispatch, maLichChieu]);
 
     // Xử lý logic chọn/hủy chọn ghế
     const handleSeatSelect = (seat) => {
         const isSelected = selectedSeats.find(s => s.maGhe === seat.maGhe);
         if (isSelected) {
-            setSelectedSeats(selectedSeats.filter(s => s.maGhe !== seat.maGhe)); // Hủy chọn
+            setSelectedSeats(selectedSeats.filter(s => s.maGhe !== seat.maGhe));
         } else {
-            setSelectedSeats([...selectedSeats, seat]); // Chọn
+            setSelectedSeats([...selectedSeats, seat]);
         }
     };
-    
-    
+
     // --- Xử lý tính toán và định dạng dữ liệu ---
     const totalPrice = selectedSeats.reduce((sum, seat) => sum + seat.giaVe, 0);
 
-    // CẬP NHẬT: Hiển thị tên ghế có hàng (A1, B2)
     const formattedSelectedSeats = selectedSeats.map(s => {
         const seatDisplayName = getSeatDisplayName(s);
         return `${seatDisplayName} - ${s.giaVe.toLocaleString('vi-VN')} VNĐ`;
     }).join(', ');
-    
+
     const formatTime = (seconds) => {
         const minutes = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
 
-    // --- HÀM XỬ LÝ ĐẶT VÉ (BOOKING TICKET) ---
-    const handleBooking = () => {
+    // --- HÀM XỬ LÝ ĐẶT VÉ (BOOKING TICKET) ĐÃ HOÀN THIỆN LOGIC ---
+    const handleBooking = async () => {
+        
+        if (!isUserLoggedIn) {
+            alert("Vui lòng đăng nhập để tiến hành đặt vé.");
+            navigate('/login'); // Có thể dùng để chuyển hướng
+            return;
+        }
         if (selectedSeats.length === 0) {
             alert("Vui lòng chọn ít nhất một ghế để đặt vé.");
             return;
         }
-        const hoTen = userName; 
-        // Lấy thông tin ghế đã chọn với tên ghế đã được định dạng (A1, B2)
-        const seatsInfo = selectedSeats.map(s => {
-            const seatDisplayName = getSeatDisplayName(s);
-            return `${seatDisplayName} (${s.giaVe.toLocaleString('vi-VN')} VNĐ)`;
-        }).join(', ');
-
-        const totalPrice = selectedSeats.reduce((sum, seat) => sum + seat.giaVe, 0);
-        const movieName = thongTinPhim?.tenPhim || 'Phim';
-        const rapName = thongTinPhim?.tenRap || 'Rạp';
+        if (bookingLoading) return; // Tránh bấm liên tục
+        if (!userAccount) {
+        alert("Lỗi hệ thống: Không tìm thấy thông tin tài khoản người đặt.");
+        console.error("Lỗi đặt vé: userAccount là null/undefined.");
+        return; 
+    }
+        // 1. Chuẩn bị dữ liệu
+        const danhSachVe = selectedSeats.map(s => ({
+            maGhe: s.maGhe,
+            giaVe: s.giaVe,
+        }));
         
-        const message = `
-            CẢM ƠN ${hoTen.toUpperCase()} ĐÃ ĐẶT VÉ!
-            ------------------------------------------
-            Phim: ${movieName}
-            Rạp: ${rapName}
-            ------------------------------------------
-            Ghế đã chọn (${selectedSeats.length}): ${seatsInfo}
-            Tổng tiền: ${totalPrice.toLocaleString('vi-VN')} VNĐ
-           
-        `;
-
-        // Hiển thị thông báo
-        alert(message);
-
-        // Xóa danh sách ghế đang chọn trên client (giả lập hoàn tất)
-        setSelectedSeats([]);
+        const bookingData = {
+            maLichChieu: maLichChieu,
+            danhSachVe: danhSachVe,
+            taiKhoanNguoiDat: userAccount,
+        };
         
-        // TODO: Thêm logic gọi API đặt vé tại đây
+        console.log("➡️ Bắt đầu gọi API đặt vé...", bookingData);
+        
+        // 2. Gọi API đặt vé và Xử lý kết quả
+        try {
+            // Hiển thị thông báo chờ (nếu cần, dùng toast/modal thay vì alert)
+            console.log("✅ Đặt vé thành công, đang xử lý tiếp..."); // Giữ nguyên log cũ
+            await dispatch(bookTicket(bookingData)).unwrap();
+            // 3. Xử lý khi đặt vé THÀNH CÔNG
+            const seatsInfo = selectedSeats.map(s => {
+                const seatDisplayName = getSeatDisplayName(s);
+                return `${seatDisplayName} (${s.giaVe.toLocaleString('vi-VN')} VNĐ)`;
+            }).join(', ');
+            
+            const movieName = thongTinPhim?.tenPhim || 'Phim';
+            const rapName = thongTinPhim?.tenRap || 'Rạp';
+            
+            const successMessage = `
+CẢM ƠN ${userName.toUpperCase()} ĐÃ ĐẶT VÉ!
+------------------------------------------
+Phim: ${movieName}
+Rạp: ${rapName}
+------------------------------------------
+Ghế đã chọn (${selectedSeats.length}): ${seatsInfo}
+Tổng tiền: ${totalPrice.toLocaleString('vi-VN')} VNĐ
+            `;
+            
+            alert(`Đặt vé thành công! Chi tiết:\n${successMessage}`);
+
+            // Reset ghế đã chọn trên client
+            setSelectedSeats([]);
+            
+            // Tải lại danh sách phòng vé để cập nhật ghế đã đặt
+            // ⭐ Cần thiết để hiển thị ghế vừa đặt thành màu 'đã đặt'
+            dispatch(roomFetch(maLichChieu)); 
+
+        } catch (err) {
+            // 4. Xử lý khi đặt vé THẤT BẠI
+            const errorMessage = (err.content || err.message) || "Đặt vé thất bại. Vui lòng thử lại.";
+            alert(`Đặt vé thất bại: ${errorMessage}`);
+            console.error("Lỗi đặt vé:", err);
+        }
     };
 
 
@@ -213,7 +236,7 @@ const BookingRoom = () => {
                     {/* Màn hình */}
                     <div className="w-[300px] bg-orange-600 h-5 mb-1 rounded-t-lg mx-auto"></div>
                     <p className="text-center mb-4 text-sm font-semibold">Màn hình</p>
-                    
+
                     {/* Sơ đồ Ghế */}
                     <div className="flex flex-col items-center overflow-x-auto p-2">
                         {Object.entries(seatsByRow).map(([row, seats]) => (
@@ -221,9 +244,9 @@ const BookingRoom = () => {
                                 <span className="w-6 text-center mr-2 font-bold text-gray-400">{row}</span>
                                 <div className="flex">
                                     {seats.map((seat) => (
-                                        <Seat 
-                                            key={seat.maGhe} 
-                                            seat={seat} 
+                                        <Seat
+                                            key={seat.maGhe}
+                                            seat={seat}
                                             isSelecting={selectedSeats.some(s => s.maGhe === seat.maGhe)}
                                             onSelect={handleSeatSelect}
                                         />
@@ -233,7 +256,7 @@ const BookingRoom = () => {
                         ))}
                     </div>
 
-                    {/* Chú thích Ghế (Giữ nguyên như mẫu) */}
+                    {/* Chú thích Ghế */}
                     <div className="flex flex-wrap justify-center mt-6 text-xs md:text-sm space-x-4 md:space-x-8">
                         <div className="flex items-center space-x-1">
                             <div className="w-4 h-4 bg-gray-600 rounded"></div>
@@ -255,11 +278,11 @@ const BookingRoom = () => {
                         </div>
                     </div>
                 </div>
-                
+
                 {/* Cột 2: Thông tin Chi tiết và Thanh toán */}
                 <div className="p-4 bg-gray-800 rounded-lg shadow-xl self-start lg:col-span-1">
                     <h2 className="text-xl font-bold mb-4 border-b border-gray-700 pb-2">{thongTinPhim.tenPhim}</h2>
-                    
+
                     <div className="space-y-3 text-sm">
                         <div className="flex justify-between">
                             <span className="text-gray-400">Ngày chiếu giờ chiếu</span>
@@ -274,15 +297,13 @@ const BookingRoom = () => {
                             <span className="font-semibold">{thongTinPhim.tenRap}</span>
                         </div>
                         <div className="">
-                            {/* CẬP NHẬT: Hiển thị số lượng ghế */}
-                            <span className="text-gray-400 block mb-1">Ghế chọn ({selectedSeats.length})</span> 
-                            {/* CẬP NHẬT: Hiển thị tên ghế có hàng (A1, B2) */}
+                            <span className="text-gray-400 block mb-1">Ghế chọn ({selectedSeats.length})</span>
                             <span className="font-semibold text-orange-400 break-words">
                                 {formattedSelectedSeats || 'Chưa chọn ghế nào'}
                             </span>
                         </div>
                     </div>
-                    
+
                     {/* Đường phân cách */}
                     <div className="my-4 border-t border-gray-700"></div>
 
@@ -297,15 +318,19 @@ const BookingRoom = () => {
                             <span className="text-orange-400">{totalPrice.toLocaleString('vi-VN')} VNĐ</span>
                         </div>
                     </div>
-                    
+
                     {/* Nút Đặt vé */}
-                    <button 
-                        className={`w-full mt-6 py-3 rounded-lg font-bold transition duration-200 ${selectedSeats.length > 0 ? 'bg-orange-600 hover:bg-orange-700' : 'bg-gray-700 cursor-not-allowed'}`}
-                        disabled={selectedSeats.length === 0}
-                        onClick={handleBooking} // <-- GÁN HÀM XỬ LÝ ĐẶT VÉ
+                    <button
+                        className={`w-full mt-6 py-3 rounded-lg font-bold transition duration-200 
+                            ${selectedSeats.length > 0 && !bookingLoading ? 'bg-orange-600 hover:bg-orange-700' : 'bg-gray-700 cursor-not-allowed'}
+                        `}
+                        disabled={selectedSeats.length === 0 || bookingLoading}
+                        onClick={handleBooking}
                     >
-                        BOOKING TICKET
+                        {bookingLoading ? 'Đang Đặt Vé...' : 'BOOKING TICKET'}
                     </button>
+                    {/* Hiển thị lỗi đặt vé từ Redux */}
+                    {bookingError && <p className="text-red-500 text-xs mt-2 text-center">{bookingError.message || "Lỗi đặt vé: Vui lòng thử lại."}</p>}
                 </div>
             </div>
         </div>

@@ -14,17 +14,9 @@ const navigate = useNavigate();
 
   const handleLogout = () => {
     dispatch(logout());
-    navigate("/login"); // hoặc trang bạn muốn chuyển về
+    navigate("/login");
   };
 
-    // Về tự làm chức năng map ra Li xong render ra
-  const renderLi = () => {
-    const navHome = routes[0];
-    if(!hiddenNav)
-    {
-      
-    }
-  }
   return (
 <nav className="bg-white border-gray-200 dark:bg-gray-900 fixed top-0 w-full z-50 ">
   <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
@@ -49,6 +41,12 @@ const navigate = useNavigate();
           <NavLink to="list-movie" 
           className={({isActive})=> isActive ? "text-blue-700" : "" }
           >List Movie</NavLink>
+        </li>
+          
+        <li>
+          <NavLink to="profile" 
+          className={({isActive})=> isActive ? "text-blue-700" : "" }
+          >Profile</NavLink>
         </li>
         {!user && (
           <>

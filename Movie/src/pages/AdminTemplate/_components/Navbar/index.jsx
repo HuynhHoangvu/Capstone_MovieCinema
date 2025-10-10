@@ -1,12 +1,20 @@
 import { NavLink } from "react-router-dom"
-
+import { authLogout } from "../../Auth/slice"
+import { useDispatch } from "react-redux"; 
+import { useNavigate } from "react-router-dom";
 export default function Navbar() {
+  const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        dispatch(authLogout());
+        navigate("/auth"); 
+    };
   return (
    <nav className="bg-white border-gray-200 dark:bg-gray-900">
   <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-    <NavLink to="https://flowbite.com/" className="flex items-center space-x-3 rtl:space-x-reverse">
-      <img src="https://flowbite.com/docs/images/logo.svg" className="h-8" alt="Flowbite Logo" />
-      <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Flowbite</span>
+    <NavLink to="/admin/dashboard" className="flex items-center space-x-3 rtl:space-x-reverse">
+      <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Admin</span>
     </NavLink>
     <button data-collapse-toggle="navbar-default" type="button" className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="navbar-default" aria-expanded="false">
       <span className="sr-only">Open main menu</span>
@@ -22,13 +30,25 @@ export default function Navbar() {
           
           aria-current="page">Dashboard</NavLink>
         </li>
+
         <li>
-          <NavLink to="add"
+          <NavLink to="manage-user"
           className={({isActive})=> isActive ? "text-blue-700" : "" }
          
-           >Add User</NavLink>
+           >Manage User</NavLink>
         </li>
-      
+      <li>
+          <NavLink to="add-film"
+          className={({isActive})=> isActive ? "text-blue-700" : "" }
+         
+           >Add Flim</NavLink>
+        </li>
+         <li>
+          <NavLink to="auth"
+          className={({isActive})=> isActive ? "text-blue-700" : "" }
+          onClick={handleLogout} 
+           >Đăng xuất</NavLink>
+        </li>
       </ul>
     </div>
   </div>

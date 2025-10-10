@@ -1,11 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-// NHỚ ĐỔI ĐƯỜNG DẪN IMPORT TỚI SLICE MỚI CỦA BẠN
 import { fetchShowtimeByMovie } from './showtimeDetailSlice'; 
-// Nếu bạn có một file tiện ích riêng, hãy import các hàm vào đây:
-// import { getImageUrl, formatTime, formatDate } from 'path/to/utils'; 
 
-// --- HÀM TIỆN ÍCH (Giữ nguyên) ---
 const getImageUrl = (imagePath) => {
     if (!imagePath) return "/images/default-movie.jpg";
     if (imagePath.startsWith('http')) return imagePath;
@@ -18,7 +14,6 @@ const formatTime = (isoTime) => {
     if (!isoTime) return "N/A";
     try {
         const date = new Date(isoTime);
-        // Định dạng thành HH:mm CH/SA (Ví dụ: 08:30 SÁNG)
         const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
         return timeStr.replace('AM', 'SA').replace('PM', 'CH'); 
     } catch (e) { return "N/A"; }
@@ -32,14 +27,12 @@ const formatDate = (isoTime) => {
 };
 
 
-// --- Component: Chi tiết Giờ Chiếu cho MỘT CỤM RẠP ---
 const CumRapShowtimes = ({ cumRap, onSelectMaLichChieu  }) => {
     const daysOfWeek = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
     
     const handleTimeClick = (lc) =>{
         onSelectMaLichChieu(lc.maLichChieu);
     }
-    // Nhóm lịch chiếu (lichChieuPhim) theo ngày
     const groupedByDate = useMemo(() => {
         if (!cumRap?.lichChieuPhim?.length) return {};
         
@@ -79,13 +72,11 @@ const CumRapShowtimes = ({ cumRap, onSelectMaLichChieu  }) => {
 
     return (
         <div className="border border-gray-200 rounded-lg shadow-sm mb-6 bg-white">
-            {/* Header Cụm Rạp */}
             <div className="p-3 border-b border-gray-200">
                 <h3 className="text-sm font-bold text-red-600">{cumRap?.tenCumRap || 'Tên cụm rạp...'}</h3>
                 <p className="text-xs text-gray-500">{cumRap?.diaChi || 'Địa chỉ...'}</p>
             </div>
 
-            {/* Header Ngày Chiếu (7 cột) */}
             <div className="flex text-center text-xs font-semibold border-b border-gray-200 bg-gray-50">
                 {sortedDates.map((dateStr, index) => (
                     <div 
@@ -98,14 +89,11 @@ const CumRapShowtimes = ({ cumRap, onSelectMaLichChieu  }) => {
                 ))}
             </div>
 
-            {/* Khung Giờ Chiếu (Chỉ một dòng Phim) */}
             <div className="flex p-3">
-                {/* Tên định dạng phim/công nghệ */}
                 <div className="w-[80px] text-center flex-shrink-0 text-sm font-semibold text-gray-600 border-r pr-3 pt-2">
                     2D Digital
                 </div>
 
-                {/* Giờ Chiếu theo Cột Ngày */}
                 <div className="flex flex-grow ml-3">
                     {sortedDates.map((dateKey, dateIndex) => {
                         const times = groupedByDate[dateKey] || [];
@@ -118,7 +106,6 @@ const CumRapShowtimes = ({ cumRap, onSelectMaLichChieu  }) => {
                                           className="text-xs font-semibold px-1.5 py-0.5 text-green-600 border border-green-600 rounded hover:bg-green-600 hover:text-white transition duration-200 whitespace-nowrap"
                                             onClick={()=>handleTimeClick(lc)}
                                         >
-                                            {/* Hiển thị Giờ và SA/CH */}
                                             <span className="font-bold">{lc.time.split(' ')[0]}</span>
                                             <span className="text-[10px] ml-1 opacity-70">{lc.time.split(' ')[1]}</span>
                                         </button>
