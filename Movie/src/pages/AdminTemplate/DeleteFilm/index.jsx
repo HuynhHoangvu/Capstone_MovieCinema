@@ -9,18 +9,16 @@ export default function DeleteFilmButton({ maPhim, tenPhim, onSuccessfulDelete }
     const handleDelete = async () => {
         if (loading) return; 
 
-        const isConfirmed = window.confirm(`Bạn có chắc chắn muốn xóa phim "${tenPhim}" (Mã: ${maPhim}) không?`);
+        const isConfirmed = window.confirm(`Bạn có chắc chắn muốn xóa phim "${tenPhim}"`);
         
         if (isConfirmed) {
             try {
               
-                const resultAction =  dispatch(deleteFilm(maPhim)); 
+                const resultAction = await dispatch(deleteFilm(maPhim)).unwarp(); 
                 
-                if (deleteFilm.fulfilled.match(resultAction)) {
-                    alert(`✅ Xóa phim "${tenPhim}" thành công!`);
-                    if(onSuccessfulDelete) {
-                        onSuccessfulDelete(maPhim);
-                    }
+                alert(`Xóa phim "${tenPhim}" thành công!`);
+                if(onSuccessfulDelete) {
+                    onSuccessfulDelete(maPhim);
                 }
             } catch (error) {
                 console.error(" Lỗi xóa phim:", error);

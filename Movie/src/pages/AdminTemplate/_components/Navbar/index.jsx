@@ -37,12 +37,7 @@ export default function Navbar() {
          
            >Manage User</NavLink>
         </li>
-      <li>
-          <NavLink to="add-film"
-          className={({isActive})=> isActive ? "text-blue-700" : "" }
-         
-           >Add Flim</NavLink>
-        </li>
+      
          <li>
           <NavLink to="auth"
           className={({isActive})=> isActive ? "text-blue-700" : "" }

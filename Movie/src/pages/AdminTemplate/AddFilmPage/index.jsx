@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addFilm, resetAddFilmState } from "./slice";
+import { useNavigate } from "react-router-dom";
+
 const ToggleSwitch = ({ label, checked, onChange }) => (
   <div className="flex items-center space-x-3 mb-4">
     <span className="text-gray-700 w-24 text-sm">{label}:</span>
@@ -33,6 +35,7 @@ const initialFormState = {
 
 export default function AddFilm() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { loading, data, error } = useSelector((state) => state.addFilmReducer);
   const [formState, setFormState] = useState({
     tenPhim: "",
@@ -116,6 +119,8 @@ export default function AddFilm() {
       alert("Thêm phim thành công!");
       setFormState(initialFormState);
       dispatch(resetAddFilmState());
+      navigate("/admin/dashboard");
+
     }
     return () => {
       if (formState.hinhAnhPreview) {

@@ -61,12 +61,12 @@ if (isConfirmed) {
         const resultAction =  dispatch(deleteFilm(maPhim));
         
         if (deleteFilm.fulfilled.match(resultAction)) {
-            alert(`✅ Xóa phim "${tenPhim}" thành công!`);
+            alert(`Xóa phim "${tenPhim}" thành công!`);
             fetchMovies();
         } else {
             const errorPayload = resultAction.payload;
             const errorMessage = errorPayload?.message || errorPayload || "Lỗi không xác định";
-            alert(`❌ Xóa phim thất bại: ${errorMessage}`);
+            alert(`Xóa phim thất bại: ${errorMessage}`);
         }
         
         setDeletingMaPhim(null); 
@@ -79,7 +79,7 @@ if (isConfirmed) {
             <div className="mb-6">
                 <button
                     className="flex items-center bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md shadow-md transition duration-150 ease-in-out"
-                    onClick={() => navigate(`/admin/add`)}
+                    onClick={() => navigate(`/admin/add-film`)}
                 >
                     <i className="fas fa-plus mr-2"></i> 
                     Thêm phim
