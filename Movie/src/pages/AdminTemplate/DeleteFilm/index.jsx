@@ -1,8 +1,8 @@
-import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { deleteFilm } from './slice'; 
 
 export default function DeleteFilmButton({ maPhim, tenPhim, onSuccessfulDelete }) {
+    const dispatch = useDispatch(); 
     const { loading } = useSelector(state => state.deleteFilmReducer);
 
     const handleDelete = async () => {
@@ -12,12 +12,16 @@ export default function DeleteFilmButton({ maPhim, tenPhim, onSuccessfulDelete }
         
         if (isConfirmed) {
             try {
+                await dispatch(deleteFilm(maPhim)).unwrap(); 
+                
                 alert(`Xóa phim "${tenPhim}" thành công!`);
+                
                 if(onSuccessfulDelete) {
-                    onSuccessfulDelete(maPhim);
+                    onSuccessfulDelete();
                 }
             } catch (error) {
-                alert(` Xóa phim thất bại: ${error.message || "Lỗi không xác định"}`);
+                const errorMessage = error.message || JSON.stringify(error) || "Lỗi không xác định";
+                alert(`Xóa phim thất bại: ${errorMessage}`);
             }
         }
     };
@@ -26,9 +30,10 @@ export default function DeleteFilmButton({ maPhim, tenPhim, onSuccessfulDelete }
         <button 
             type="button"
             onClick={handleDelete}
-            className="text-red-600 hover:text-red-900 font-medium py-1 px-3 border border-red-600 hover:border-red-900 rounded transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+            className="text-red-600 hover:text-red-900 font-medium py-1 px-3  rounded transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={loading} 
         >
-            {loading ? 'Đang xóa...' : 'Xóa'}
+                <i className="fas fa-trash-alt"></i>       
         </button>
     );
 }
