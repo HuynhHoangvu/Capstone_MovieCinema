@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { deleteFilm } from './slice'; 
 
 export default function DeleteFilmButton({ maPhim, tenPhim, onSuccessfulDelete }) {
-    const dispatch = useDispatch();
     const { loading } = useSelector(state => state.deleteFilmReducer);
 
     const handleDelete = async () => {
@@ -13,15 +12,11 @@ export default function DeleteFilmButton({ maPhim, tenPhim, onSuccessfulDelete }
         
         if (isConfirmed) {
             try {
-              
-                const resultAction = await dispatch(deleteFilm(maPhim)).unwarp(); 
-                
                 alert(`Xóa phim "${tenPhim}" thành công!`);
                 if(onSuccessfulDelete) {
                     onSuccessfulDelete(maPhim);
                 }
             } catch (error) {
-                console.error(" Lỗi xóa phim:", error);
                 alert(` Xóa phim thất bại: ${error.message || "Lỗi không xác định"}`);
             }
         }

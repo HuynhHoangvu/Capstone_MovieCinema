@@ -53,25 +53,23 @@ const fetchMovies = () => {
         movie.tenPhim.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const handleDeleteFilm =async (maPhim,tenPhim) =>{
-         const isConfirmed = window.confirm(`Bạn có chắc chắn muốn xóa phim "${tenPhim}" (Mã: ${maPhim}) không?`);
-         
-if (isConfirmed) {
+const handleDeleteFilm = async (maPhim, tenPhim) => {
+    const isConfirmed = window.confirm(`Bạn có chắc chắn muốn xóa phim "${tenPhim}" (Mã: ${maPhim}) không?`);
+    if (isConfirmed) {
         setDeletingMaPhim(maPhim);
-        const resultAction =  dispatch(deleteFilm(maPhim));
-        
-        if (deleteFilm.fulfilled.match(resultAction)) {
+        try {
+            await dispatch(deleteFilm(maPhim)).unwrap(); 
+            
             alert(`Xóa phim "${tenPhim}" thành công!`);
-            fetchMovies();
-        } else {
-            const errorPayload = resultAction.payload;
-            const errorMessage = errorPayload?.message || errorPayload || "Lỗi không xác định";
+            fetchMovies(); 
+        } catch (error) {
+            const errorMessage = error.message || "Lỗi không xác định khi xóa phim";
             alert(`Xóa phim thất bại: ${errorMessage}`);
+        } finally {
+            setDeletingMaPhim(null);
         }
-        
-        setDeletingMaPhim(null); 
     }
-    }
+}
     return (
         <div className="p-8 bg-gray-50 min-h-screen">
             <h1 className="text-3xl font-semibold text-gray-800 mb-6">Quản Lý Phim</h1>
