@@ -3,11 +3,9 @@ import ListMoviePage from "../ListMoviePage";
 import Banner from "../BannerPage";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchBanner } from "../BannerPage/slice";
-import InfoShow from "../showTime";
 export default function HomePage() {
   const {
     data: bannerData,
-    loading,
     bannerLoading,
     error: bannerError,
   } = useSelector((state) => state.bannerReducer);
@@ -35,7 +33,6 @@ export default function HomePage() {
     <div className="mt-20">
       <Banner data={bannerData} />
       <ListMoviePage />
-      <InfoShow />
     </div>
   );
 }

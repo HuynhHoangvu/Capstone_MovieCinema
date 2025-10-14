@@ -26,7 +26,6 @@ export default function ListMoviePage() {
     });
   };
   // Tính toán số lượng trang
-
   const totalPages = state.data
     ? Math.ceil(state.data.length / ITEMS_PER_PAGE)
     : 0;
