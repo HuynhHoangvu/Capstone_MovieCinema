@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom"
 import { routes } from "../../../../routes"
-import { logout } from "../../LoginPage/slice";
+import { actLogout } from "../../LoginPage/slice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -13,7 +13,7 @@ export default function Navbar() {
 const navigate = useNavigate();
 
   const handleLogout = () => {
-    dispatch(logout());
+    dispatch(actLogout());
     navigate("/login");
   };
 

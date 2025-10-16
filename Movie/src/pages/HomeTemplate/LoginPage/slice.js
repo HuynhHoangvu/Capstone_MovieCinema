@@ -66,11 +66,12 @@ const userReducer = createSlice({
       });
   },
 });
-export const { logout } = userReducer.actions;
 export default userReducer.reducer;
-export const actLogout = (dispatch) => {
-  // remove local storage
-  localStorage.removeItem("ADMIN_INFO");
+export const actLogout = () => {
+  return (dispatch) =>{
+// remove local storage
+  localStorage.removeItem("USER_INFO");
   // clear state
   dispatch(userReducer.actions.logoutUser())
+  }
 }
