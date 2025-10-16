@@ -26,21 +26,21 @@ export default function Navbar() {
       <ul className="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
         <li>
           <NavLink to="dashboard" 
-          className={({isActive})=> isActive ? "text-blue-700" : "" }
+          className="text-blue-700"
           
           aria-current="page">Dashboard</NavLink>
         </li>
 
         <li>
           <NavLink to="manage-user"
-          className={({isActive})=> isActive ? "text-blue-700" : "" }
+          className= "text-blue-700"
          
            >Manage User</NavLink>
         </li>
       
          <li>
           <NavLink to="auth"
-          className={({isActive})=> isActive ? "text-blue-700" : "" }
+          className="text-red-700" 
           onClick={handleLogout} 
            >Đăng xuất</NavLink>
         </li>

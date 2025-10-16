@@ -82,7 +82,6 @@ export default function DashBoard() {
         />
         <button
           className="absolute inset-y-0 right-0 px-3 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600"
-          onClick={() => console.log("Thực hiện tìm kiếm")}
         >
           <i className="fas fa-search"></i>
         </button>
