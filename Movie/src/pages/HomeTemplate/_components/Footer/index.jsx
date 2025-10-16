@@ -22,7 +22,6 @@ export default function Footer() {
                             </svg>
                             <div className="flex flex-col">
                                 <span className="text-lg font-bold text-yellow-500">CYBERLEARN</span>
-                                <span className="text-xs text-gray-400">ĐÀO TẠO CHUYÊN GIA LẬP TRÌNH</span>
                             </div>
                         </div>
                     </div>

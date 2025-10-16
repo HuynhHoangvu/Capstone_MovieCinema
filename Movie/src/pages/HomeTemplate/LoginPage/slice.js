@@ -40,10 +40,10 @@ const userReducer = createSlice({
   name: "userReducer",
   initialState,
   reducers: {
-    logout: (state) => {
+    logoutUser: (state) => {
+      state.loading = null;
       state.data = null;
       state.error = null;
-      localStorage.removeItem("USER_INFO");
     },
   },
   extraReducers: (builder) => {
@@ -68,3 +68,9 @@ const userReducer = createSlice({
 });
 export const { logout } = userReducer.actions;
 export default userReducer.reducer;
+export const actLogout = (dispatch) => {
+  // remove local storage
+  localStorage.removeItem("ADMIN_INFO");
+  // clear state
+  dispatch(userReducer.actions.logoutUser())
+}

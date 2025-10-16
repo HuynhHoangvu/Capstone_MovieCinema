@@ -1,13 +1,13 @@
 import { NavLink } from "react-router-dom"
-import { authLogout } from "../../Auth/slice"
 import { useDispatch } from "react-redux"; 
 import { useNavigate } from "react-router-dom";
+import { actLogout } from "../../Auth/slice";
 export default function Navbar() {
   const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const handleLogout = () => {
-        dispatch(authLogout());
+        dispatch(actLogout());
         navigate("/auth"); 
     };
   return (

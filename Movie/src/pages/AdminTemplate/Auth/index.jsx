@@ -2,7 +2,6 @@ import {useState, useEffect} from "react";
 import {authLogin} from "./slice";
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
-
 export default function Auth() {
     const error = useSelector((state) => state.authReducer.error);
     const data = useSelector((state) => state.authReducer.data);

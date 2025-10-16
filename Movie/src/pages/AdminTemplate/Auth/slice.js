@@ -42,8 +42,7 @@ const authReducer = createSlice({
     authLogout: (state) => {
       state.data = null; 
       state.error = null;
-      localStorage.removeItem("ADMIN_INFO"); 
-
+      state.loading = null;
     },
   },
   extraReducers: (builder) => {
@@ -62,5 +61,12 @@ const authReducer = createSlice({
       });
   },
 });
-export const { authLogout } = authReducer.actions;
 export default authReducer.reducer;
+export const actLogout = () => {
+  return (dispatch) => {
+    // remove local storage
+    localStorage.removeItem("ADMIN_INFO");
+   // clear state
+    dispatch(authReducer.actions.authLogout());
+  }
+}

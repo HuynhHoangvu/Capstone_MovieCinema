@@ -36,7 +36,7 @@ const handleSubmit = async (e) =>{
       }, 3000); 
 
     } catch (error) {
-      alert.error("Đăng ký thất bại:", error);
+      console.error("Đăng ký thất bại:", error);  
        setSuccessMessage("Đăng ký thất bại. Vui lòng kiểm tra lại thông tin.");
     }
 }
