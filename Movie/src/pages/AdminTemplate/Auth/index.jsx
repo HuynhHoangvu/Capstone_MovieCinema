@@ -1,5 +1,5 @@
 import {useState, useEffect} from "react";
-import {authLogin} from "./slice";
+import {authLogin, tryAutoLogin} from "./slice";
 import {useDispatch, useSelector} from "react-redux";
 import {useNavigate} from "react-router-dom";
 export default function Auth() {
@@ -13,6 +13,9 @@ export default function Auth() {
         matKhau: "",
     });
 
+    useEffect(()=>{
+        dispatch(tryAutoLogin())
+    },[dispatch])
     useEffect(() => {
         if (data) {
             navigate("/admin/dashboard");
